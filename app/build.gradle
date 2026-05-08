@@ -20,11 +20,9 @@ android {
     }
     
     dependencies {
-    // Baris ini wajib ada untuk membaca file .jar di folder libs
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    
-    // Opsional: Jika ingin lebih spesifik
-    // implementation files('libs/reflection.jar')
+    // Jalur paling aman agar tidak terjadi 'cannot find symbol'
+    implementation files('libs/reflection.jar')
     }
+
 
 }
