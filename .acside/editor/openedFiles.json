@@ -19,14 +19,14 @@
       "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/build.gradle",
       "selection": {
         "end": {
-          "column": 0,
-          "index": 0,
-          "line": 0
+          "column": 26,
+          "index": 96,
+          "line": 6
         },
         "start": {
-          "column": 0,
-          "index": 0,
-          "line": 0
+          "column": 26,
+          "index": 96,
+          "line": 6
         }
       }
     },
@@ -49,14 +49,14 @@
       "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/src/main/AndroidManifest.xml",
       "selection": {
         "end": {
-          "column": 0,
-          "index": 0,
-          "line": 0
+          "column": 4,
+          "index": 112,
+          "line": 2
         },
         "start": {
-          "column": 0,
-          "index": 0,
-          "line": 0
+          "column": 4,
+          "index": 112,
+          "line": 2
         }
       }
     }

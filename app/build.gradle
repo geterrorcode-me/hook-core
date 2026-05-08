@@ -20,10 +20,10 @@ android {
     }
     
     dependencies {
-    // Mengambil semua file .jar yang ada di folder libs
+    // Baris ini wajib ada untuk membaca file .jar di folder libs
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     
-    // Atau jika ingin spesifik satu file saja:
+    // Opsional: Jika ingin lebih spesifik
     // implementation files('libs/reflection.jar')
     }
 
