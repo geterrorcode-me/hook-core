@@ -1,0 +1,28 @@
+# Gradle & Build
+.gradle/
+build/
+app/build/
+captures/
+
+# Native/NDK
+# Kita abaikan folder obj dan libs hasil compile lokal
+app/src/main/obj/
+app/src/main/libs/
+.externalNativeBuild/
+.cxx/
+
+# Library (PENTING!)
+# Kita abaikan semua JAR secara umum, KECUALI yang kita butuhkan
+app/libs/*
+!app/libs/reflection.jar
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# OS & Logs
+.DS_Store
+*.log
+local.properties

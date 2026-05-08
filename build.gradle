@@ -1,0 +1,17 @@
+// Top-level build file di mana anda dapat menambahkan konfigurasi 
+// yang berlaku untuk semua module di project ini.
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Plugin versi 7.4.2 cocok untuk proyek riset yang stabil di ACS/AndroidIDE
+        classpath "com.android.tools.build:gradle:7.4.2"
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

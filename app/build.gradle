@@ -1,0 +1,30 @@
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 21
+        // Menentukan arsitektur HP yang didukung
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
+    }
+
+    externalNativeBuild {
+        ndkBuild {
+            path "src/main/jni/Android.mk"
+        }
+    }
+    
+    dependencies {
+    // Mengambil semua file .jar yang ada di folder libs
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    
+    // Atau jika ingin spesifik satu file saja:
+    // implementation files('libs/reflection.jar')
+    }
+
+}
