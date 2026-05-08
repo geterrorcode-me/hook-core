@@ -19,14 +19,14 @@
       "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/build.gradle",
       "selection": {
         "end": {
-          "column": 4,
-          "index": 641,
-          "line": 27
+          "column": 0,
+          "index": 534,
+          "line": 28
         },
         "start": {
-          "column": 4,
-          "index": 641,
-          "line": 27
+          "column": 0,
+          "index": 534,
+          "line": 28
         }
       }
     },
@@ -64,14 +64,14 @@
       "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/src/main/java/black/hook/HookManager.java",
       "selection": {
         "end": {
-          "column": 27,
-          "index": 48,
-          "line": 2
+          "column": 0,
+          "index": 856,
+          "line": 29
         },
         "start": {
-          "column": 27,
-          "index": 48,
-          "line": 2
+          "column": 0,
+          "index": 856,
+          "line": 29
         }
       }
     },
@@ -104,7 +104,22 @@
           "line": 48
         }
       }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/src/main/jni/native-hook.cpp",
+      "selection": {
+        "end": {
+          "column": 0,
+          "index": 0,
+          "line": 0
+        },
+        "start": {
+          "column": 0,
+          "index": 0,
+          "line": 0
+        }
+      }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/hook-core/.github/workflows/build-hook.yml"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/src/main/jni/native-hook.cpp"
 }
