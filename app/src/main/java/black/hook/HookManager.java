@@ -15,15 +15,18 @@ public class HookManager {
         }
     }
 
-    // Fungsi Native
     public static native String getEngineVersion();
     public static native void nativeHookMethod(Member method);
 
     public static void init() {
-        // Melakukan bypass Hidden API agar engine bisa bekerja
-        boolean success = HiddenApiBypass.addRuntimeWhiteList("L;");
+        // Panggil method bypass() sesuai hasil javap tadi
+        try {
+            boolean success = HiddenApiBypass.bypass();
+            Log.i(TAG, "Bypass Hidden API status: " + success);
+        } catch (Throwable e) {
+            Log.e(TAG, "Gagal menjalankan bypass: " + e.getMessage());
+        }
         
-        Log.i(TAG, "Bypass Hidden API status: " + success);
         Log.i(TAG, "BlackHook Engine Version: " + getEngineVersion());
     }
 }
