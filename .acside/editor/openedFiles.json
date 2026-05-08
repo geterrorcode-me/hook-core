@@ -34,6 +34,21 @@
       "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/gradle/wrapper/gradle-wrapper.properties",
       "selection": {
         "end": {
+          "column": 73,
+          "index": 138,
+          "line": 2
+        },
+        "start": {
+          "column": 73,
+          "index": 138,
+          "line": 2
+        }
+      }
+    },
+    {
+      "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/src/main/AndroidManifest.xml",
+      "selection": {
+        "end": {
           "column": 0,
           "index": 0,
           "line": 0
@@ -46,5 +61,5 @@
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/hook-core/gradle/wrapper/gradle-wrapper.properties"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/src/main/AndroidManifest.xml"
 }
