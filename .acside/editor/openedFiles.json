@@ -1,32 +1,17 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/src/main/jni/native-hook.cpp",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 2744,
-          "line": 80
-        },
-        "start": {
-          "column": 0,
-          "index": 2744,
-          "line": 80
-        }
-      }
-    },
-    {
       "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/src/main/java/black/hook/HookManager.java",
       "selection": {
         "end": {
           "column": 0,
-          "index": 1033,
-          "line": 23
+          "index": 1983,
+          "line": 50
         },
         "start": {
           "column": 0,
-          "index": 1033,
-          "line": 23
+          "index": 1983,
+          "line": 50
         }
       }
     }
