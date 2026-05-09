@@ -1,14 +1,12 @@
 package black.hook;
 
 import android.util.Log;
-import org.lsposed.hiddenapibypass.HiddenApiBypass;
 
 public class HookManager {
     private static final String TAG = "BlackHook-Java";
 
     static {
         try {
-            // Memuat library native (nama harus sesuai dengan di CMakeLists.txt)
             System.loadLibrary("blackhook");
             Log.i(TAG, "Library native 'blackhook' berhasil dimuat.");
         } catch (UnsatisfiedLinkError e) {
@@ -16,28 +14,27 @@ public class HookManager {
         }
     }
 
-    // Fungsi Native (Pintu menuju C++)
     public static native String getEngineVersion();
     public static native void nativeHookMethod(Object method);
 
-    /**
-     * Inisialisasi Engine
-     */
     public static void init() {
         try {
-            // Bypass Hidden API (Penting untuk Android 11 ke atas)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                // Gunakan cara yang lebih aman untuk Android modern
-                boolean success = HiddenApiBypass.addAllowedExternalMethods("L");
-                Log.i(TAG, "Bypass Hidden API status: " + success);
+            // Kita gunakan refleksi untuk memanggil HiddenApiBypass 
+            // Agar jika library tidak ada, aplikasi tidak langsung mati saat compile
+            if (android.os.Build.VERSION.SDK_INT >= 28) { // Android P ke atas
+                Class<?> bypassClass = Class.forName("org.lsposed.hiddenapibypass.HiddenApiBypass");
+                java.lang.reflect.Method addMethods = bypassClass.getDeclaredMethod("addAllowedExternalMethods", String[].class);
+                addMethods.invoke(null, (Object) new String[]{"L"});
+                Log.i(TAG, "Bypass Hidden API Success via Reflection");
             }
-            
-            // Log versi engine dari native untuk memastikan koneksi OK
+        } catch (Exception e) {
+            Log.e(TAG, "Bypass Hidden API Failed: " + e.getMessage());
+        }
+        
+        try {
             Log.i(TAG, "vPhoneOS Engine Version: " + getEngineVersion());
-            
-        } catch (Throwable e) {
-            // Jika bypass gagal, jangan biarkan aplikasi FC
-            Log.e(TAG, "Inisialisasi HookManager bermasalah: " + e.getMessage());
+        } catch (Throwable t) {
+            Log.e(TAG, "Native Method getEngineVersion not found!");
         }
     }
 }
