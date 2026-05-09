@@ -9,16 +9,16 @@
 #include <stdio.h>
 #include "dobby.h"
 
-// Kita perlu deklarasi internal untuk update property read-only
-#define _REALLY_INCLUDE_SYS__SYSTEM_PROPERTIES_H_
-#include <sys/_system_properties.h>
+// Definisi tipe fungsi untuk dlsym
+typedef int (*PFN_PROP_UPDATE)(prop_info*, const char*, unsigned int);
+typedef int (*PFN_PROP_ADD)(const char*, unsigned int, const char*, unsigned int);
 
 #define LOG_TAG "VPhoneOS-Core"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 
 const char* REDIRECT_BASE = "/data/user/0/com.aar.test/files/virtual_os";
 
-// Pointer fungsi asli
+// Pointer fungsi asli untuk VFS
 int (*orig_openat)(int dirfd, const char *pathname, int flags, mode_t mode);
 int (*orig_access)(const char *pathname, int mode);
 
@@ -38,16 +38,21 @@ const char* get_redirected_path(const char* path) {
     return path;
 }
 
-// Helper: Paksa tulis properti ke memori sistem
+// Helper: Paksa tulis properti ke memori menggunakan dlsym (Bypass Linker Error)
 void patch_system_property(const char* key, const char* value) {
-    prop_info* pi = (prop_info*) __system_property_find(key);
-    if (pi) {
-        // Pada Android modern, kita mencoba update langsung di area memori
-        __system_property_update(pi, value, strlen(value));
+    // Cari alamat fungsi internal libc secara dinamis
+    PFN_PROP_UPDATE prop_update = (PFN_PROP_UPDATE) dlsym(RTLD_DEFAULT, "__system_property_update");
+    PFN_PROP_ADD prop_add = (PFN_PROP_ADD) dlsym(RTLD_DEFAULT, "__system_property_add");
+
+    const prop_info* pi = __system_property_find(key);
+    if (pi && prop_update) {
+        prop_update((prop_info*)pi, value, strlen(value));
         LOGI("Identity: Patched %s -> %s", key, value);
-    } else {
-        __system_property_add(key, strlen(key), value, strlen(value));
+    } else if (prop_add) {
+        prop_add(key, strlen(key), value, strlen(value));
         LOGI("Identity: Added %s -> %s", key, value);
+    } else {
+        LOGI("Identity: Gagal patch %s (Symbol not found)", key);
     }
 }
 
@@ -84,7 +89,7 @@ Java_black_hook_HookManager_nativeHookMethod(JNIEnv *env, jclass clazz, jobject 
 
 JNIEXPORT jstring JNICALL
 Java_black_hook_HookManager_getEngineVersion(JNIEnv *env, jclass clazz) {
-    return env->NewStringUTF("4.1.0-VFS-Identity-Sync");
+    return env->NewStringUTF("4.1.1-VFS-Identity-Fixed");
 }
 
 }
