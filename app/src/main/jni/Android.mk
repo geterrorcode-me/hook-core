@@ -1,17 +1,21 @@
 LOCAL_PATH := $(call my-dir)
 
-# --- Konfigurasi Dobby Engine ---
+# 1. Deklarasikan Dobby sebagai Prebuilt Library
 include $(CLEAR_VARS)
-LOCAL_MODULE := dobby
-LOCAL_SRC_FILES := libdobby.a # Jika kamu pakai static library
+LOCAL_MODULE := dobby_static
+LOCAL_SRC_FILES := libs/$(TARGET_ARCH_ABI)/libdobby.a
 include $(PREBUILT_STATIC_LIBRARY)
 
-# --- Konfigurasi BlackHook ---
+# 2. Build Library Utama (blackhook)
 include $(CLEAR_VARS)
 LOCAL_MODULE    := blackhook
 LOCAL_SRC_FILES := native-hook.cpp
+
+# Beritahu lokasi header dobby.h
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
-LOCAL_STATIC_LIBRARIES := dobby
+
+# Hubungkan dengan Dobby
+LOCAL_STATIC_LIBRARIES := dobby_static
 LOCAL_LDLIBS    := -llog
 
 include $(BUILD_SHARED_LIBRARY)
