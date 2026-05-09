@@ -1,62 +1,17 @@
 {
   "allFiles": [
     {
-      "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/src/main/jni/Android.mk",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 542,
-          "line": 21
-        },
-        "start": {
-          "column": 0,
-          "index": 542,
-          "line": 21
-        }
-      }
-    },
-    {
       "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/src/main/jni/native-hook.cpp",
       "selection": {
         "end": {
           "column": 0,
-          "index": 2697,
-          "line": 83
+          "index": 3771,
+          "line": 100
         },
         "start": {
           "column": 0,
-          "index": 2697,
-          "line": 83
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/build.gradle",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 570,
-          "line": 31
-        },
-        "start": {
-          "column": 0,
-          "index": 570,
-          "line": 31
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/.github/workflows/build-hook.yml",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 0,
-          "line": 0
-        },
-        "start": {
-          "column": 0,
-          "index": 0,
-          "line": 0
+          "index": 3771,
+          "line": 100
         }
       }
     }
