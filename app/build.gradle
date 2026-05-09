@@ -3,13 +3,14 @@ plugins {
 }
 
 android {
-    compileSdk 34
     namespace 'black.hook'
+    compileSdk 34
+
     defaultConfig {
         minSdk 21
-        // Menentukan arsitektur HP yang didukung
         ndk {
-            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            // Pastikan ini sesuai dengan file .a yang kamu punya
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
         }
     }
 
@@ -18,26 +19,13 @@ android {
             path "src/main/jni/Android.mk"
         }
     }
-    
-    dependencies {
-    // Jalur paling aman agar tidak terjadi 'cannot find symbol'
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
     implementation files('libs/reflection.jar')
-    }
-    
-    
-    task downloadDobby {
-    doLast {
-        def dobbyDir = file("src/main/jni/external/dobby")
-        if (!dobbyDir.exists()) {
-            dobbyDir.mkdirs()
-            // Mengambil prebuilt binary dari repository resmi Dobby
-            // Kita akan mendownload versi yang sudah jadi agar praktis
-            println "Downloading Dobby binaries..."
-            // (Logika download manual atau git clone submodule bisa ditaruh di sini)
-        }
-      }
-    }
-
-     preBuild.dependsOn downloadDobby
-
 }

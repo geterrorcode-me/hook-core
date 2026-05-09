@@ -20,13 +20,13 @@
       "selection": {
         "end": {
           "column": 0,
-          "index": 1521,
-          "line": 51
+          "index": 684,
+          "line": 23
         },
         "start": {
           "column": 0,
-          "index": 1521,
-          "line": 51
+          "index": 684,
+          "line": 23
         }
       }
     },
@@ -34,17 +34,17 @@
       "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/build.gradle",
       "selection": {
         "end": {
-          "column": 5,
-          "index": 995,
-          "line": 37
+          "column": 0,
+          "index": 585,
+          "line": 31
         },
         "start": {
-          "column": 5,
-          "index": 995,
-          "line": 37
+          "column": 0,
+          "index": 585,
+          "line": 31
         }
       }
     }
   ],
-  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/src/main/jni/Android.mk"
+  "selectedFile": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/build.gradle"
 }
