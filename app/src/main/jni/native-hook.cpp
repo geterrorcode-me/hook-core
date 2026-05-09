@@ -2,7 +2,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
-#include <string>
 #include <sys/system_properties.h>
 #include <android/log.h>
 #include <dlfcn.h>
@@ -10,37 +9,33 @@
 
 #define LOG_TAG "vPhoneOS-Core"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 // Pointer fungsi asli
 void (*orig_prop_read_cb)(const prop_info* pi, void (*callback)(void* cookie, const char* name, const char* value, uint32_t serial), void* cookie);
 
-// Callback untuk mengganti identitas device
+// Callback spoofing yang sangat hati-hati
 void my_property_callback(void* cookie, const char* name, const char* value, uint32_t serial) {
     auto real_cb = (void (*)(void*, const char*, const char*, uint32_t))((void**)cookie)[0];
     void* real_cookie = ((void**)cookie)[1];
     
-    const char* final_value = value;
-
-    if (name != nullptr) {
+    if (name != nullptr && value != nullptr) {
         if (strcmp(name, "ro.product.model") == 0) {
-            final_value = "SM-S918B"; // S23 Ultra
-        } else if (strcmp(name, "ro.product.brand") == 0 || strcmp(name, "ro.product.manufacturer") == 0) {
-            final_value = "samsung";
+            real_cb(real_cookie, name, "SM-S918B", serial);
+            return;
+        }
+        if (strcmp(name, "ro.product.brand") == 0 || strcmp(name, "ro.product.manufacturer") == 0) {
+            real_cb(real_cookie, name, "samsung", serial);
+            return;
         }
     }
 
-    if (real_cb != nullptr) {
-        real_cb(real_cookie, name, final_value, serial);
+    if (real_cb) {
+        real_cb(real_cookie, name, value, serial);
     }
 }
 
-// Handler Hook Property
 void fake_prop_read_cb(const prop_info* pi, void (*callback)(void*, const char*, const char*, uint32_t), void* cookie) {
-    if (callback == nullptr) {
-        orig_prop_read_cb(pi, callback, cookie);
-        return;
-    }
+    if (callback == nullptr || orig_prop_read_cb == nullptr) return;
     void* wrapper[2] = {(void*)callback, cookie};
     orig_prop_read_cb(pi, my_property_callback, wrapper);
 }
@@ -49,39 +44,24 @@ extern "C" {
 
 JNIEXPORT jstring JNICALL
 Java_black_hook_HookManager_getEngineVersion(JNIEnv *env, jclass clazz) {
-    return env->NewStringUTF("2.3.0-Stable-S23U");
+    return env->NewStringUTF("2.4.0-Ultra-Stable");
 }
 
 JNIEXPORT void JNICALL
 Java_black_hook_HookManager_nativeHookMethod(JNIEnv *env, jclass clazz, jobject method) {
-    LOGI("Engine Native: Starting Safe Hook Mode...");
+    LOGI("Engine Native: Attempting Hook...");
 
-    // --- STRATEGI 1: NATIVE BYPASS HIDDEN API ---
-    jclass vm_runtime_class = env->FindClass("dalvik/system/VMRuntime");
-    if (vm_runtime_class) {
-        jmethodID get_runtime_fn = env->GetStaticMethodID(vm_runtime_class, "getRuntime", "()Ldalvik/system/VMRuntime;");
-        jobject runtime_obj = env->CallStaticObjectMethod(vm_runtime_class, get_runtime_fn);
-        if (runtime_obj) {
-            jmethodID set_exemptions_fn = env->GetMethodID(vm_runtime_class, "setHiddenApiExemptions", "([Ljava/lang/String;)V");
-            jobjectArray packages = env->NewObjectArray(1, env->FindClass("java/lang/String"), env->NewStringUTF("L"));
-            env->CallVoidMethod(runtime_obj, set_exemptions_fn, packages);
-            LOGI("Native Bypass: OK");
-        }
-    }
-
-    // --- STRATEGI 2: DOBBY HOOKING ---
-    void* libc_handle = dlopen("libc.so", RTLD_LAZY);
+    // Gunakan RTLD_NOW agar simbol langsung dimuat
+    void* libc_handle = dlopen("libc.so", RTLD_NOW);
     if (libc_handle) {
         void* prop_cb_addr = dlsym(libc_handle, "__system_property_read_callback");
         if (prop_cb_addr) {
-            // Hook hanya pada property untuk menghindari FC saat booting app
+            // Gunakan DobbyHook dengan verifikasi
             DobbyHook(prop_cb_addr, (void *)fake_prop_read_cb, (void **)&orig_prop_read_cb);
-            LOGI("Hook Property Read: SUCCESS");
+            LOGI("Engine Native: Hook Success");
         }
         dlclose(libc_handle);
     }
-    
-    LOGI("Engine Native: Hooks Applied Successfully");
 }
 
 }

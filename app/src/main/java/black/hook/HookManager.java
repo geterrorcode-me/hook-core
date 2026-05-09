@@ -1,6 +1,7 @@
 package black.hook;
 
 import android.util.Log;
+import java.lang.reflect.Method;
 
 public class HookManager {
     private static final String TAG = "BlackHook-Java";
@@ -8,29 +9,32 @@ public class HookManager {
     static {
         try {
             System.loadLibrary("blackhook");
-            Log.i(TAG, "Library native 'blackhook' loaded.");
-        } catch (UnsatisfiedLinkError e) {
-            Log.e(TAG, "Fatal: Could not load native library!");
+        } catch (Exception e) {
+            Log.e(TAG, "Library Load Fail");
         }
     }
 
-    // Fungsi native
     public static native String getEngineVersion();
     public static native void nativeHookMethod(Object method);
 
     public static void init() {
+        // Bypass Hidden API di Java (Lebih aman dari crash native)
         try {
-            Log.i(TAG, "Inisialisasi Engine...");
-            
-            // Panggil hook native
-            nativeHookMethod(null);
-            
-            // Verifikasi versi untuk memastikan bridge hidup
-            String version = getEngineVersion();
-            Log.i(TAG, "Engine Running Version: " + version);
-            
+            Class<?> vmRuntimeClass = Class.forName("dalvik.system.VMRuntime");
+            Method getRuntimeMethod = vmRuntimeClass.getDeclaredMethod("getRuntime");
+            Object runtime = getRuntimeMethod.invoke(null);
+            Method setExemptions = vmRuntimeClass.getDeclaredMethod("setHiddenApiExemptions", String[].class);
+            setExemptions.invoke(runtime, (Object) new String[]{"L"});
+            Log.i(TAG, "Java Bypass OK");
         } catch (Throwable t) {
-            Log.e(TAG, "Error saat inisialisasi: " + t.getMessage());
+            Log.e(TAG, "Java Bypass Error: " + t.getMessage());
+        }
+
+        // Panggil native
+        try {
+            nativeHookMethod(null);
+        } catch (Throwable t) {
+            Log.e(TAG, "Native Hook Error");
         }
     }
 }
