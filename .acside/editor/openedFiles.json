@@ -19,14 +19,14 @@
       "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/app/src/main/jni/native-hook.cpp",
       "selection": {
         "end": {
-          "column": 0,
-          "index": 1144,
-          "line": 37
+          "column": 26,
+          "index": 2358,
+          "line": 71
         },
         "start": {
-          "column": 0,
-          "index": 1144,
-          "line": 37
+          "column": 26,
+          "index": 2358,
+          "line": 71
         }
       }
     },

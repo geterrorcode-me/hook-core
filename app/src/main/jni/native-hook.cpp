@@ -1,36 +1,75 @@
 #include <jni.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+#include <string>
+#include <sys/system_properties.h>
 #include <android/log.h>
 #include "dobby.h"
 
-#define LOG_TAG "BlackHook-Native"
+#define LOG_TAG "vPhoneOS-Core"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 
-// 1. Variabel untuk menyimpan alamat fungsi asli (agar aplikasi tidak crash)
-int (*orig_getpid)();
+// --- Penampung Fungsi Asli ---
+int (*orig_open)(const char *pathname, int flags, mode_t mode);
+int (*orig_prop_get)(const char *name, char *value);
 
-// 2. Fungsi "Palsu" kita
-int fake_getpid() {
-    LOGI("Diterjang BlackHook: Seseorang memanggil getpid(), kita berikan nilai palsu!");
-    return 8888; 
+// --- Logika Pengalihan File ---
+int fake_open(const char *pathname, int flags, mode_t mode) {
+    // Contoh: Alirkan akses folder sistem ke folder virtual vphoneos
+    if (pathname != nullptr && strstr(pathname, "/data/system/")) {
+        std::string virtual_path = "/data/data/black.hook/virtual_os"; 
+        virtual_path += (pathname + 12); // Lewati "/data/system"
+        
+        LOGI("File Redirected: %s -> %s", pathname, virtual_path.c_str());
+        return orig_open(virtual_path.c_str(), flags, mode);
+    }
+    return orig_open(pathname, flags, mode);
+}
+
+// --- Logika Spoofing Identitas HP ---
+int fake_prop_get(const char *name, char *value) {
+    int len = orig_prop_get(name, value);
+    if (name == nullptr) return len;
+
+    // Ubah Model HP
+    if (strcmp(name, "ro.product.model") == 0) {
+        strcpy(value, "SM-S918B");
+        return strlen(value);
+    }
+    // Ubah Brand
+    if (strcmp(name, "ro.product.brand") == 0) {
+        strcpy(value, "Galaxy S23 Ultra");
+        return strlen(value);
+    }
+    // Ubah Versi Android (Contoh: Jadi Android 15)
+    if (strcmp(name, "ro.build.version.release") == 0) {
+        strcpy(value, "15");
+        return strlen(value);
+    }
+
+    return len;
 }
 
 extern "C" {
 
 JNIEXPORT jstring JNICALL
 Java_black_hook_HookManager_getEngineVersion(JNIEnv *env, jclass clazz) {
-    return env->NewStringUTF("1.0.0-Dobby-Final-Active");
+    return env->NewStringUTF("2.0.0-Full-Virtual-Engine");
 }
 
 JNIEXPORT void JNICALL
 Java_black_hook_HookManager_nativeHookMethod(JNIEnv *env, jclass clazz, jobject method) {
-    LOGI("Memasang Inline Hook pada getpid...");
+    LOGI("Memulai Inisialisasi Galaxy S23 Ultra Engine...");
 
-    // 3. Eksekusi Hook menggunakan Dobby
-    // Parameter: (Alamat Fungsi Target, Fungsi Pengganti, Simpan Fungsi Asli)
-    DobbyHook((void *)getpid, (void *)fake_getpid, (void **)&orig_getpid);
+    // 1. Pasang Hook untuk Pengalihan File
+    DobbyHook((void *)open, (void *)fake_open, (void **)&orig_open);
 
-    LOGI("Hook Berhasil Pasang! Sistem sekarang akan menganggap PID adalah 8888");
+    // 2. Pasang Hook untuk Identitas HP (System Property)
+    // Menggunakan __system_property_get dari libc.so
+    DobbyHook((void *)__system_property_get, (void *)fake_prop_get, (void **)&orig_prop_get);
+
+    LOGI("Galaxy S23 Ultra Engine Berhasil Aktif!");
 }
 
 }
