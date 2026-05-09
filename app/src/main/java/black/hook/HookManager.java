@@ -1,40 +1,23 @@
-package black.hook;
+public static void init() {
+    try {
+        // Coba bypass menggunakan sistem double-reflection
+        Method forName = Class.class.getDeclaredMethod("forName", String.class);
+        Method getDeclaredMethod = Class.class.getDeclaredMethod("getDeclaredMethod", String.class, Class[].class);
 
-import android.util.Log;
-import java.lang.reflect.Method;
-
-public class HookManager {
-    private static final String TAG = "BlackHook-Java";
-
-    static {
-        try {
-            System.loadLibrary("blackhook");
-        } catch (Exception e) {
-            Log.e(TAG, "Library Load Fail");
-        }
+        Class<?> vmRuntimeClass = (Class<?>) forName.invoke(null, "dalvik.system.VMRuntime");
+        Method getRuntimeMethod = (Method) getDeclaredMethod.invoke(vmRuntimeClass, "getRuntime", (Class[]) null);
+        Object runtime = getRuntimeMethod.invoke(null);
+        
+        Method setExemptions = (Method) getDeclaredMethod.invoke(vmRuntimeClass, "setHiddenApiExemptions", new Class[]{String[].class});
+        setExemptions.invoke(runtime, (Object) new String[]{"L"});
+        Log.i(TAG, "Java Mega-Bypass OK");
+    } catch (Throwable t) {
+        Log.e(TAG, "Bypass Failed, continuing to native...");
     }
 
-    public static native String getEngineVersion();
-    public static native void nativeHookMethod(Object method);
-
-    public static void init() {
-        // Bypass Hidden API di Java (Lebih aman dari crash native)
-        try {
-            Class<?> vmRuntimeClass = Class.forName("dalvik.system.VMRuntime");
-            Method getRuntimeMethod = vmRuntimeClass.getDeclaredMethod("getRuntime");
-            Object runtime = getRuntimeMethod.invoke(null);
-            Method setExemptions = vmRuntimeClass.getDeclaredMethod("setHiddenApiExemptions", String[].class);
-            setExemptions.invoke(runtime, (Object) new String[]{"L"});
-            Log.i(TAG, "Java Bypass OK");
-        } catch (Throwable t) {
-            Log.e(TAG, "Java Bypass Error: " + t.getMessage());
-        }
-
-        // Panggil native
-        try {
-            nativeHookMethod(null);
-        } catch (Throwable t) {
-            Log.e(TAG, "Native Hook Error");
-        }
+    try {
+        nativeHookMethod(null);
+    } catch (Throwable t) {
+        Log.e(TAG, "Native Hook Error");
     }
 }

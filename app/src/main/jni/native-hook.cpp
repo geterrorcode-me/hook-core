@@ -1,6 +1,5 @@
 #include <jni.h>
 #include <unistd.h>
-#include <fcntl.h>
 #include <string.h>
 #include <sys/system_properties.h>
 #include <android/log.h>
@@ -10,57 +9,71 @@
 #define LOG_TAG "vPhoneOS-Core"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 
-// Pointer fungsi asli
-void (*orig_prop_read_cb)(const prop_info* pi, void (*callback)(void* cookie, const char* name, const char* value, uint32_t serial), void* cookie);
+// --- Pointer Fungsi Asli ---
+int (*orig_get)(const char* name, char* value);
+void (*orig_read_cb)(const prop_info* pi, void (*callback)(void* cookie, const char* name, const char* value, uint32_t serial), void* cookie);
 
-// Callback spoofing yang sangat hati-hati
+// --- LOGIKA SPOOFING ---
+const char* spoof_property(const char* name, const char* original_value) {
+    if (name == nullptr) return original_value;
+    
+    if (strcmp(name, "ro.product.model") == 0 || strcmp(name, "ro.product.system.model") == 0) {
+        return "SM-S918B";
+    }
+    if (strcmp(name, "ro.product.brand") == 0 || strcmp(name, "ro.product.manufacturer") == 0) {
+        return "samsung";
+    }
+    return original_value;
+}
+
+// --- FAKE FUNCTIONS ---
+
+// 1. Hook untuk __system_property_get
+int fake_get(const char* name, char* value) {
+    int len = orig_get(name, value);
+    const char* spoofed = spoof_property(name, value);
+    if (spoofed != value) {
+        strcpy(value, spoofed);
+        return strlen(value);
+    }
+    return len;
+}
+
+// 2. Hook untuk __system_property_read_callback
 void my_property_callback(void* cookie, const char* name, const char* value, uint32_t serial) {
     auto real_cb = (void (*)(void*, const char*, const char*, uint32_t))((void**)cookie)[0];
     void* real_cookie = ((void**)cookie)[1];
-    
-    if (name != nullptr && value != nullptr) {
-        if (strcmp(name, "ro.product.model") == 0) {
-            real_cb(real_cookie, name, "SM-S918B", serial);
-            return;
-        }
-        if (strcmp(name, "ro.product.brand") == 0 || strcmp(name, "ro.product.manufacturer") == 0) {
-            real_cb(real_cookie, name, "samsung", serial);
-            return;
-        }
-    }
-
-    if (real_cb) {
-        real_cb(real_cookie, name, value, serial);
-    }
+    real_cb(real_cookie, name, spoof_property(name, value), serial);
 }
 
-void fake_prop_read_cb(const prop_info* pi, void (*callback)(void*, const char*, const char*, uint32_t), void* cookie) {
-    if (callback == nullptr || orig_prop_read_cb == nullptr) return;
+void fake_read_cb(const prop_info* pi, void (*callback)(void*, const char*, const char*, uint32_t), void* cookie) {
     void* wrapper[2] = {(void*)callback, cookie};
-    orig_prop_read_cb(pi, my_property_callback, wrapper);
+    orig_read_cb(pi, my_property_callback, wrapper);
 }
 
 extern "C" {
 
 JNIEXPORT jstring JNICALL
 Java_black_hook_HookManager_getEngineVersion(JNIEnv *env, jclass clazz) {
-    return env->NewStringUTF("2.4.0-Ultra-Stable");
+    return env->NewStringUTF("2.5.0-MultiHook-S23U");
 }
 
 JNIEXPORT void JNICALL
 Java_black_hook_HookManager_nativeHookMethod(JNIEnv *env, jclass clazz, jobject method) {
-    LOGI("Engine Native: Attempting Hook...");
+    LOGI("Engine Native: Starting Multi-Hook...");
 
-    // Gunakan RTLD_NOW agar simbol langsung dimuat
-    void* libc_handle = dlopen("libc.so", RTLD_NOW);
-    if (libc_handle) {
-        void* prop_cb_addr = dlsym(libc_handle, "__system_property_read_callback");
-        if (prop_cb_addr) {
-            // Gunakan DobbyHook dengan verifikasi
-            DobbyHook(prop_cb_addr, (void *)fake_prop_read_cb, (void **)&orig_prop_read_cb);
-            LOGI("Engine Native: Hook Success");
-        }
-        dlclose(libc_handle);
+    void* libc = dlopen("libc.so", RTLD_NOW);
+    if (libc) {
+        // Hook Metode 1 (Callback)
+        void* read_cb_addr = dlsym(libc, "__system_property_read_callback");
+        if (read_cb_addr) DobbyHook(read_cb_addr, (void *)fake_read_cb, (void **)&orig_read_cb);
+
+        // Hook Metode 2 (Legacy Get) - Sering dipakai aplikasi lama/game
+        void* get_addr = dlsym(libc, "__system_property_get");
+        if (get_addr) DobbyHook(get_addr, (void *)fake_get, (void **)&orig_get);
+
+        LOGI("Engine Native: Multi-Hook Applied!");
+        dlclose(libc);
     }
 }
 
