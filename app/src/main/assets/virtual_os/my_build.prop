@@ -1,0 +1,7 @@
+ro.product.model=SM-S918B
+ro.product.brand=samsung
+ro.product.manufacturer=samsung
+ro.build.product=dm3q
+ro.product.device=dm3q
+ro.build.description=dm3q-user 14 UP1A.231005.007 S918BXXU3BWJM release-keys
+ro.build.fingerprint=samsung/dm3qnsxx/dm3q:14/UP1A.231005.007/S918BXXU3BWJM:user/release-keys

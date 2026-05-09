@@ -1,70 +1,81 @@
 #include <jni.h>
-#include <sys/mman.h>
 #include <sys/system_properties.h>
-#include <string.h>
 #include <android/log.h>
+#include <string.h>
 #include <dlfcn.h>
+#include <fcntl.h>
 #include <unistd.h>
-#include <stdint.h>
+#include <sys/stat.h>
+#include "dobby.h" // Pastikan Dobby sudah ada di path JNI
 
-#define LOG_TAG "vPhoneOS-Core"
+#define LOG_TAG "VPhoneOS-VFS"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 
-// Fungsi pembantu untuk mendapatkan PAGE_SIZE secara dinamis
-size_t get_system_page_size() {
-    return sysconf(_SC_PAGESIZE);
+// Lokasi penyimpanan file virtual kita di internal data
+const char* REDIRECT_BASE = "/data/user/0/com.aar.test/files/virtual_os";
+
+// Fungsi asli yang akan kita simpan
+int (*orig_openat)(int dirfd, const char *pathname, int flags, mode_t mode);
+int (*orig_access)(const char *pathname, int mode);
+
+// Logika pembelokan jalur
+const char* get_redirected_path(const char* path) {
+    if (path == nullptr) return nullptr;
+
+    // 1. Belokkan build.prop
+    if (strcmp(path, "/system/build.prop") == 0 || strstr(path, "build.prop")) {
+        LOGI("VFS: Redirecting build.prop -> %s/my_build.prop", REDIRECT_BASE);
+        static char new_path[256];
+        sprintf(new_path, "%s/my_build.prop", REDIRECT_BASE);
+        return new_path;
+    }
+
+    // 2. Belokkan framework.jar (Inti dari riset kamu)
+    if (strstr(path, "/system/framework/framework.jar")) {
+        LOGI("VFS: Redirecting framework.jar -> %s/framework.jar", REDIRECT_BASE);
+        static char new_path[256];
+        sprintf(new_path, "%s/framework.jar", REDIRECT_BASE);
+        return new_path;
+    }
+
+    return path;
 }
 
-// Fungsi untuk memaksa tulis ke memori read-only (Memory Patching)
-void force_write(void* addr, const char* value) {
-    if (addr == nullptr) return;
+// Hook Fungsi openat
+int fake_openat(int dirfd, const char *pathname, int flags, mode_t mode) {
+    return orig_openat(dirfd, get_redirected_path(pathname), flags, mode);
+}
 
-    size_t size = strlen(value) + 1;
-    size_t page_size = get_system_page_size();
-    uintptr_t page_start = (uintptr_t)addr & ~(page_size - 1);
-    
-    // Buka proteksi memori agar bisa ditulis (RWX)
-    // Kita buka 2 halaman untuk berjaga-jaga jika data melewati batas halaman
-    mprotect((void*)page_start, page_size * 2, PROT_READ | PROT_WRITE | PROT_EXEC);
-    
-    // Timpa nilainya secara langsung di memori sistem
-    memcpy(addr, value, size);
-    
-    // Kembalikan ke mode awal (Read-Only)
-    mprotect((void*)page_start, page_size * 2, PROT_READ);
+// Hook Fungsi access (Agar sistem percaya file virtual itu ada)
+int fake_access(const char *pathname, int mode) {
+    return orig_access(get_redirected_path(pathname), mode);
 }
 
 extern "C" {
 
-JNIEXPORT jstring JNICALL
-Java_black_hook_HookManager_getEngineVersion(JNIEnv *env, jclass clazz) {
-    return env->NewStringUTF("3.1.0-MemoryPatch-Fixed");
-}
-
 JNIEXPORT void JNICALL
 Java_black_hook_HookManager_nativeHookMethod(JNIEnv *env, jclass clazz, jobject method) {
-    LOGI("Engine Native: Memory Patching Start...");
+    LOGI("Engine VFS: Initializing I/O Redirector...");
 
-    // Cari alamat memory dari properti sistem
-    const prop_info* model_info = __system_property_find("ro.product.model");
-    const prop_info* brand_info = __system_property_find("ro.product.brand");
-    const prop_info* manu_info = __system_property_find("ro.product.manufacturer");
+    void* libc = dlopen("libc.so", RTLD_LAZY);
+    if (!libc) return;
 
-    // Patch Model
-    if (model_info) {
-        // Pada Android modern, nilai tersimpan di offset tertentu dalam prop_info
-        // Kita gunakan __system_property_read untuk mendapatkan alamat value-nya
-        char name[PROP_NAME_MAX];
-        char value[PROP_VALUE_MAX];
-        __system_property_read(model_info, name, value);
-        
-        LOGI("Found Model at memory, applying patch...");
-        // Trik: Karena kita tidak bisa mendapatkan pointer langsung dari prop_info dengan mudah,
-        // kita menggunakan brute-force patching pada area yang ditemukan oleh find.
-        // Namun cara paling stabil di Android 15 adalah tetap melalui Hooking.
+    // Hook openat
+    void* openat_addr = dlsym(libc, "openat");
+    if (openat_addr) {
+        DobbyHook(openat_addr, (void *)fake_openat, (void **)&orig_openat);
+        LOGI("VFS: openat Hooked!");
     }
 
-    LOGI("Engine Native: Memory Patching Complete");
+    // Hook access
+    void* access_addr = dlsym(libc, "access");
+    if (access_addr) {
+        DobbyHook(access_addr, (void *)fake_access, (void **)&orig_access);
+        LOGI("VFS: access Hooked!");
+    }
+    
+    dlclose(libc);
+    LOGI("Engine VFS: All Core Hooks Applied.");
 }
 
 }
