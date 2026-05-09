@@ -28,4 +28,5 @@ android {
 
 dependencies {
     implementation files('libs/reflection.jar')
+    implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
 }
