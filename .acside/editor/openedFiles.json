@@ -5,28 +5,13 @@
       "selection": {
         "end": {
           "column": 0,
-          "index": 3085,
-          "line": 90
+          "index": 94,
+          "line": 3
         },
         "start": {
           "column": 0,
-          "index": 3085,
-          "line": 90
-        }
-      }
-    },
-    {
-      "file": "/storage/emulated/0/AndroidIDEProjects/hook-core/.github/workflows/build-hook.yml",
-      "selection": {
-        "end": {
-          "column": 0,
-          "index": 0,
-          "line": 0
-        },
-        "start": {
-          "column": 0,
-          "index": 0,
-          "line": 0
+          "index": 94,
+          "line": 3
         }
       }
     }
