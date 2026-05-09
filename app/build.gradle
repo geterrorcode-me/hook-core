@@ -23,6 +23,21 @@ android {
     // Jalur paling aman agar tidak terjadi 'cannot find symbol'
     implementation files('libs/reflection.jar')
     }
+    
+    
+    task downloadDobby {
+    doLast {
+        def dobbyDir = file("src/main/jni/external/dobby")
+        if (!dobbyDir.exists()) {
+            dobbyDir.mkdirs()
+            // Mengambil prebuilt binary dari repository resmi Dobby
+            // Kita akan mendownload versi yang sudah jadi agar praktis
+            println "Downloading Dobby binaries..."
+            // (Logika download manual atau git clone submodule bisa ditaruh di sini)
+        }
+      }
+    }
 
+     preBuild.dependsOn downloadDobby
 
 }
