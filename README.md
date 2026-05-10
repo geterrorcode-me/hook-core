@@ -41,10 +41,10 @@ BlackHook tidak hanya bekerja di permukaan, ia beroperasi pada tiga lapisan utam
 ### 🚀 Core Capabilities
 | Feature | Description | Status |
 | :--- | :--- | :--- |
-| <img src="https://www.svgrepo.com/show/375541/layers.svg" width="20"/> **AMS/ATM Layer** | Task Hijacking & Activity Swapping | ![Ready](https://img.shields.io/badge/-Ready-success) |
-| <img src="https://www.svgrepo.com/show/353912/java.svg" width="20"/> **Reflective Hook** | Hidden API Bypass & Method Interception | ![Armed](https://img.shields.io/badge/-Armed-blue) |
-| <img src="https://www.svgrepo.com/show/439233/native.svg" width="20"/> **Native Core** | Linker Namespace & Memory Bridge | ![Stable](https://img.shields.io/badge/-Stable-brightgreen) |
-| <img src="https://www.svgrepo.com/show/303232/android-icon.svg" width="20"/> **V-Sandbox** | Isolated Process Mapping (:virtual_process) | ![Active](https://img.shields.io/badge/-Active-orange) |
+|  **AMS/ATM Layer** | Task Hijacking & Activity Swapping | ![Ready](https://img.shields.io/badge/-Ready-success) |
+|  **Reflective Hook** | Hidden API Bypass & Method Interception | ![Armed](https://img.shields.io/badge/-Armed-blue) |
+|  **Native Core** | Linker Namespace & Memory Bridge | ![Stable](https://img.shields.io/badge/-Stable-brightgreen) |
+|  **V-Sandbox** | Isolated Process Mapping (:virtual_process) | ![Active](https://img.shields.io/badge/-Active-orange) |
 
 ---
 
